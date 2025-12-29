@@ -1,0 +1,61 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companions Companion[]
+  messages   Message[]
+}
+
+model Category {
+  id   String @id @default(cuid())
+  name String @unique
+
+  companions Companion[]
+}
+
+model Companion {
+  id           String @id @default(cuid())
+  userId       String
+  name         String
+  description  String
+  instructions String
+  seed         String
+  src          String
+  categoryId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category Category  @relation(fields: [categoryId], references: [id])
+  messages Message[]
+
+  @@index([categoryId])
+}
+
+model Message {
+  id          String @id @default(cuid())
+  role        String @default("user")
+  content     String
+  companionId String
+  userId      String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companion Companion @relation(fields: [companionId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
