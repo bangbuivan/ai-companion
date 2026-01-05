@@ -2,19 +2,22 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
+import { toast } from "sonner";
+import { Wand2 } from "lucide-react";
+
 import { ImageUpload } from "@/components/image-upload";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 export default function NewCompanionPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
     const [imageUrl, setImageUrl] = useState("");
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
-        setError("");
 
         const formData = new FormData(e.currentTarget);
         const data = {
@@ -35,114 +38,114 @@ export default function NewCompanionPage() {
 
             if (!res.ok) {
                 const error = await res.json();
-                setError(error.error || "Failed to create companion");
+                toast.error(error.error || "Failed to create companion");
                 return;
             }
 
+            toast.success("Companion created successfully!");
             const companion = await res.json();
             router.push(`/chat/${companion.id}`);
         } catch {
-            setError("Something went wrong");
+            toast.error("Something went wrong");
         } finally {
             setLoading(false);
         }
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-            <header className="border-b border-white/10 bg-black/20 backdrop-blur-lg">
-                <div className="max-w-3xl mx-auto px-4 py-4">
-                    <Link href="/" className="text-white hover:text-purple-400">
-                        ← Back
-                    </Link>
+        <div className="flex justify-center p-4">
+            <main className="max-w-2xl w-full">
+                <div className="my-8 text-center space-y-2">
+                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+                        Create Companion
+                    </h1>
+                    <p className="text-gray-400">
+                        Craft a new AI personality to chat with.
+                    </p>
                 </div>
-            </header>
 
-            <main className="max-w-3xl mx-auto px-4 py-8">
-                <h1 className="text-3xl font-bold text-white mb-8">Create Companion</h1>
-
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    {error && (
-                        <div className="p-3 bg-red-500/20 border border-red-500 rounded-lg text-red-200">
-                            {error}
-                        </div>
-                    )}
-
+                <form onSubmit={handleSubmit} className="space-y-8 bg-white/5 p-8 rounded-2xl border border-white/10 backdrop-blur-sm">
                     {/* Image Upload */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2 text-center">
-                            Avatar
-                        </label>
+                    <div className="space-y-4 w-full flex flex-col items-center justify-center">
                         <ImageUpload
                             value={imageUrl}
                             onChange={setImageUrl}
                             disabled={loading}
                         />
+                        <p className="text-sm text-gray-400">
+                            Companion Avatar
+                        </p>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Name
-                        </label>
-                        <input
-                            name="name"
-                            type="text"
-                            required
-                            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="Elon Musk"
-                        />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Name</label>
+                            <Input
+                                name="name"
+                                required
+                                placeholder="e.g. Elon Musk"
+                                disabled={loading}
+                            />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-gray-300">Description</label>
+                            <Input
+                                name="description"
+                                required
+                                placeholder="e.g. CEO of Tesla"
+                                disabled={loading}
+                            />
+                        </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Description
-                        </label>
-                        <input
-                            name="description"
-                            type="text"
-                            required
-                            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="CEO of Tesla & SpaceX"
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-300">
                             Instructions
                         </label>
-                        <textarea
+                        <Textarea
                             name="instructions"
                             required
                             rows={4}
-                            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="You are Elon Musk. You speak about technology, innovation, and the future of humanity..."
+                            placeholder="Describe how your companion should behave..."
+                            disabled={loading}
                         />
+                        <p className="text-xs text-gray-500">
+                            Detailed instructions for the AI's behavior and personality.
+                        </p>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-300">
                             Example Conversation
                         </label>
-                        <textarea
+                        <Textarea
                             name="seed"
                             required
                             rows={4}
-                            className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                            placeholder="Human: What's your vision for the future?\nElon: I believe humanity needs to become a multi-planetary species..."
+                            placeholder="Human: Hello&#10;AI: Hi there!"
+                            disabled={loading}
                         />
+                        <p className="text-xs text-gray-500">
+                            Provide a few turn-by-turn examples to seed the conversation style.
+                        </p>
                     </div>
 
                     <input type="hidden" name="categoryId" value="default" />
 
-                    <button
+                    <Button
                         type="submit"
                         disabled={loading}
-                        className="w-full py-3 px-4 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 focus:outline-none focus:ring-2 focus:ring-purple-500 disabled:opacity-50 transition-all"
+                        variant="gradient"
+                        size="lg"
+                        className="w-full"
+                        isLoading={loading}
                     >
-                        {loading ? "Creating..." : "Create Companion"}
-                    </button>
+                        Create Companion
+                        <Wand2 className="w-4 h-4 ml-2" />
+                    </Button>
                 </form>
             </main>
         </div>
     );
 }
+
